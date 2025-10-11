@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/index.js';
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
-import { sendEmail } from '../utils/sendMail.js';
+import { sendEmail, transporter } from '../utils/sendMail.js';
 import { getEnvVar } from '../../utils/getEnvVar.js';
 
 export const registerUser = async (payload) => {
@@ -89,6 +89,46 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   });
 };
 
+// export const requestResetToken = async (email) => {
+//   const user = await UsersCollection.findOne({ email });
+//   if (!user) {
+//     throw createHttpError(404, 'User not found');
+//   }
+
+//   const resetToken = jwt.sign(
+//     {
+//       sub: user._id,
+//       email,
+//     },
+//     getEnvVar('JWT_SECRET'),
+//     {
+//       expiresIn: '5m',
+//     },
+//   );
+//   console.log('SMTP Configuration:', {
+//     host: getEnvVar('SMTP_HOST'),
+//     port: Number(getEnvVar('SMTP_PORT')),
+//     user: getEnvVar('SMTP_USER'),
+//     from: getEnvVar('SMTP_FROM'),
+//     hasPassword: !!getEnvVar('SMTP_PASSWORD'),
+//   });
+
+//   try {
+//     await sendEmail({
+//       from: getEnvVar('SMTP_FROM'),
+//       to: email,
+//       subject: 'Reset your password',
+//       html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+//     });
+//   } catch (error) {
+//     console.error('EMAIL SEND ERROR:', error);
+//     throw new createHttpError(
+//       500,
+//       'Failed to send email,please try again later',
+//     );
+//   }
+// };
+
 export const requestResetToken = async (email) => {
   const user = await UsersCollection.findOne({ email });
   if (!user) {
@@ -105,27 +145,46 @@ export const requestResetToken = async (email) => {
       expiresIn: '5m',
     },
   );
-  console.log('111=', resetToken);
-  console.log('222=', user);
-  console.log('333=',
-  getEnvVar("SMTP_HOST"),
-  Number(getEnvVar("SMTP_PORT")),
-  getEnvVar("SMTP_USER"),
-  getEnvVar("SMTP_PASSWORD"),
-  );
+
+  // Детальное логирование конфигурации
+  console.log('SMTP Configuration:', {
+    host: getEnvVar('SMTP_HOST'),
+    port: Number(getEnvVar('SMTP_PORT')),
+    user: getEnvVar('SMTP_USER'),
+    from: getEnvVar('SMTP_FROM'),
+    hasPassword: !!getEnvVar('SMTP_PASSWORD'),
+  });
 
   try {
-    await sendEmail({
+    // Сначала проверяем соединение
+    await transporter.verify();
+    console.log('SMTP connection verified successfully');
+
+    const emailOptions = {
       from: getEnvVar('SMTP_FROM'),
       to: email,
       subject: 'Reset your password',
       html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+    };
+
+    console.log('Sending email with options:', {
+      from: emailOptions.from,
+      to: emailOptions.to,
+      subject: emailOptions.subject,
     });
+
+    const result = await sendEmail(emailOptions);
+    console.log('Email sent successfully:', result.messageId);
   } catch (error) {
-    console.error('EMAIL SEND ERROR:', error);
+    console.error('EMAIL SEND ERROR DETAILS:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      stack: error.stack,
+    });
     throw new createHttpError(
       500,
-      'Failed to send email,please try again later',
+      'Failed to send email, please try again later',
     );
   }
 };
