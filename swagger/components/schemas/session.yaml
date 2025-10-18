@@ -1,0 +1,27 @@
+type: object
+required:
+  - _id
+  - userId
+  - accessToken
+  - refreshToken
+properties:
+  _id:
+    type: string
+    example: '66f5bf3d8f1e9a1c9f0d4a89'
+  userId:
+    type: string
+    example: '66f5be2d14b9e8f3c0e4a123'
+  accessToken:
+    type: string
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+  refreshToken:
+    type: string
+    example: '9f47d44b-45c1-4b68-b9e8-133a51cd3d2b'
+  createdAt:
+    type: string
+    format: date-time
+    example: '2025-10-17T12:35:45.000Z'
+  updatedAt:
+    type: string
+    format: date-time
+    example: '2025-10-17T12:45:00.000Z'

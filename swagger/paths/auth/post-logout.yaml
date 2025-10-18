@@ -1,0 +1,13 @@
+tags:
+  - Auth
+summary: Logout user
+operationId: logoutUser
+description: 'Logout user and remove session'
+security: []
+responses:
+  '204':
+    description: Successfully logged out (no content)
+  '401':
+    $ref: '../../components/responses/401.yaml'
+  '500':
+    $ref: '../../components/responses/500.yaml'

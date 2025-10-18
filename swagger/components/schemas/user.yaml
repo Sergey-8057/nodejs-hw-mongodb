@@ -1,0 +1,23 @@
+type: object
+required:
+  - _id
+  - name
+  - email
+properties:
+  _id:
+    type: string
+    example: '66f5be2d14b9e8f3c0e4a123'
+  name:
+    type: string
+    example: 'John Doe'
+  email:
+    type: string
+    example: 'john@example.com'
+  createdAt:
+    type: string
+    format: date-time
+    example: '2025-10-17T12:34:56.789Z'
+  updatedAt:
+    type: string
+    format: date-time
+    example: '2025-10-17T12:34:56.789Z'
